@@ -18,6 +18,10 @@ const getAllQuotes = async () => {
 
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: "Quotes retrieved successfully",
       metadata: { total_count: quotes.length },
@@ -37,6 +41,10 @@ const getQuoteById = async (id) => {
   if (!result.Item) {
     return {
       statusCode: 404,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({ message: "Quote not found" }),
     };
   }
@@ -52,6 +60,10 @@ const getQuoteById = async (id) => {
 
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: `Quote with id ${id} retrieved successfully`,
       quote: quote,
@@ -86,6 +98,10 @@ const getQuotesByQueryParams = async (paramsData) => {
   const quotes = result.Items || [];
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: "Quotes queried successfully",
       metadata: {
@@ -118,6 +134,10 @@ export const handler = async (event) => {
     console.error("Error occured while retrieving quotes:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Error occured while retrieving quotes",
         error: error.message,

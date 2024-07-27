@@ -58,6 +58,10 @@ const updateQuote = async (quoteId, quoteData) => {
   console.log("Updated Quote:", quoteData);
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: "Quote updated successfully",
       quote: quoteData,
@@ -73,6 +77,10 @@ export const handler = async (event) => {
     console.error("{id} path parameter is missing in the url");
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "{id} path parameter is missing in the url",
       }),
@@ -84,6 +92,10 @@ export const handler = async (event) => {
     console.error("Request body is missing");
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({ message: "Request body is missing" }),
     };
   }
@@ -97,6 +109,10 @@ export const handler = async (event) => {
     console.error("Error occurred when parsing request body:", error);
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Invalid JSON passed",
         error: error.message,
@@ -111,6 +127,10 @@ export const handler = async (event) => {
     console.error("Error validating quote body:", error);
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Error validating quote body",
         error: error.message,
@@ -132,6 +152,10 @@ export const handler = async (event) => {
       console.error("Quote with the passed {id} doesn't exist");
       return {
         statusCode: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         body: JSON.stringify({
           message: "Quote with the passed {id} doesn't exist",
         }),
@@ -141,6 +165,10 @@ export const handler = async (event) => {
     console.error("Error updating quote:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Error updating quote",
         error: error.message,

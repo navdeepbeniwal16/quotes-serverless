@@ -61,6 +61,10 @@ const createNewQuote = async (quoteData) => {
   await client.send(new PutCommand(params));
   return {
     statusCode: 201,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: "Quote created successfully",
       quote: quoteItem,
@@ -76,6 +80,10 @@ export const handler = async (event) => {
     console.error("Request body is missing");
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({ message: "Request body is missing" }),
     };
   }
@@ -89,6 +97,10 @@ export const handler = async (event) => {
     console.error("Error occurred when parsing request body:", error);
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Invalid JSON format",
         error: error.message,
@@ -103,6 +115,10 @@ export const handler = async (event) => {
     console.error("Invalid request body", body);
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Invalid request body",
         error: error.message,
@@ -119,6 +135,10 @@ export const handler = async (event) => {
       console.error("Quote with the quote and quoter already exists");
       return {
         statusCode: 409,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         body: JSON.stringify({
           message: "Quote with the quote and quoter already exists",
         }),
@@ -130,6 +150,10 @@ export const handler = async (event) => {
     console.error("Error occured while creating a quote", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Error checking if quote is present: Internal server error:",
         error: error.message,
