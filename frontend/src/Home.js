@@ -7,17 +7,79 @@ import {
   Typography,
   CardActions,
   Button,
-  IconButton,
+  Modal,
+  TextField,
+  Box,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { deleteQuote, fetchAllQuotes } from "./quotes-service";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import axios from "axios";
+
+const BASE_URL = "https://gz2qfy74t0.execute-api.us-east-1.amazonaws.com/dev";
 
 const Home = () => {
   const [quotes, setQuotes] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [newQuote, setNewQuote] = useState({
+    quote: "",
+    quoter: "",
+    source: "",
+  });
+  const vertical = "bottom";
+  const horizontal = "center";
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const getAllQuotes = async () => {
-    const quotesList = await fetchAllQuotes();
-    setQuotes(quotesList);
+    try {
+      const response = await axios.get(`${BASE_URL}/quotes`);
+      if (!response.data || !response.data.quotes) {
+        throw new Error("'data' or 'quotes' not present in the response");
+      }
+
+      const quotesList = response.data.quotes;
+      console.log("Quote fetched successfully!");
+      setQuotes(quotesList);
+    } catch (error) {
+      console.error("Error fetching quotes:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("An unknown error occurred. Please refresh.");
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleCreate = async () => {
+    try {
+      const response = await axios.post(`${BASE_URL}/quotes`, newQuote);
+      if (!response.data || !response.data.quote) {
+        throw new Error(
+          "'data' or 'quote' missing from quote creation api response"
+        );
+      }
+      const createdQuote = response.data.quote;
+      console.log("Quote created successfully!");
+      setQuotes((prevQuotes) => [...prevQuotes, createdQuote]);
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Quote created successfully!");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Error creating quote:", error);
+      if (error.response && error.response.status === 409) {
+        console.error("Duplicate quote! This quote already exists.");
+        setSnackbarSeverity("error");
+        setSnackbarMessage("Duplicate quote! This quote already exists.");
+      } else {
+        console.error("An unknown error occurred.");
+        setSnackbarSeverity("error");
+        setSnackbarMessage("An unknown error occurred. Please try again.");
+      }
+      setSnackbarOpen(true);
+    } finally {
+      setNewQuote({ quote: "", quoter: "", source: "" });
+      handleClose();
+    }
   };
 
   useEffect(() => {
@@ -29,11 +91,36 @@ const Home = () => {
     console.log(`Edit quote with id: ${id}`);
   };
 
+  // Method to handle delete functionality
   const handleDelete = async (id) => {
-    // Handle delete functionality
-    console.log(`Delete quote with id: ${id}`);
-    await deleteQuote(id);
-    setQuotes((prevQuotes) => prevQuotes.filter((quote) => quote.id !== id));
+    try {
+      await axios.delete(`${BASE_URL}/quotes/${id}`);
+      console.log("Quote delted successfully!");
+      setQuotes((prevQuotes) => prevQuotes.filter((quote) => quote.id !== id));
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Quote deleted successfully!");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Error deleting quote:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage("An unknown error occurred. Please try again.");
+      setSnackbarOpen(true);
+    } finally {
+      handleClose();
+    }
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleSnackbarClose = () => setSnackbarOpen(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewQuote((prevQuote) => ({
+      ...prevQuote,
+      [name]: value,
+    }));
   };
 
   return (
@@ -41,14 +128,28 @@ const Home = () => {
       <Typography variant="h1" sx={{ textAlign: "center" }} gutterBottom>
         Quotes
       </Typography>
-      <Grid container spacing={3}>
+      <Box sx={{ padding: 1 }}>
+        <Box style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpen}
+            style={{ marginBottom: "16px" }}
+          >
+            New
+          </Button>
+        </Box>
+      </Box>
+
+      <Grid container>
         {quotes.map((quote) => (
           <Grid item key={quote.id} xs={12} sm={12} md={12}>
             <Card
+              variant="outlined"
               style={{
                 minWidth: "275px",
                 margin: "16px",
-                backgroundColor: "#f7f7f7",
+                backgroundColor: "#fcfcfc",
               }}
             >
               <CardContent>
@@ -72,11 +173,7 @@ const Home = () => {
                   }}
                   gutterBottom
                 >
-                  <IconButton>
-                    <FavoriteBorderIcon
-                      sx={{ marginLeft: -1 }}
-                    ></FavoriteBorderIcon>
-                  </IconButton>{" "}
+                  <FavoriteIcon sx={{ marginRight: 1 }}></FavoriteIcon>
                   {quote.likes}
                 </Typography>
                 <Typography variant="caption" component="p">
@@ -89,7 +186,7 @@ const Home = () => {
               <CardActions style={{ justifyContent: "flex-end" }}>
                 <Button
                   size="small"
-                  variant="contained"
+                  variant="outlined"
                   color="primary"
                   onClick={() => handleEdit(quote.id)}
                 >
@@ -97,7 +194,7 @@ const Home = () => {
                 </Button>
                 <Button
                   size="small"
-                  variant="outlined"
+                  variant="contained"
                   color="error"
                   onClick={() => handleDelete(quote.id)}
                 >
@@ -108,6 +205,75 @@ const Home = () => {
           </Grid>
         ))}
       </Grid>
+
+      <Modal open={open} onClose={handleClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: "10px",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            New Quote
+          </Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Quote"
+            name="quote"
+            value={newQuote.quote}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Quoter"
+            name="quoter"
+            value={newQuote.quoter}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Source"
+            name="source"
+            value={newQuote.source}
+            onChange={handleChange}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreate}
+            style={{ marginTop: "16px" }}
+            disabled={newQuote.quote === "" || newQuote.quoter === ""}
+          >
+            Submit
+          </Button>
+        </Box>
+      </Modal>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical, horizontal }}
+        key={vertical + horizontal}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
