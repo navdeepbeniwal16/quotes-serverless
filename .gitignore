@@ -1,0 +1,4 @@
+# Instance keys
+kwot_ec2_instance.pem
+
+functions/layers/*/nodejs
