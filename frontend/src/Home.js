@@ -26,29 +26,40 @@ const BASE_URL = "https://gz2qfy74t0.execute-api.us-east-1.amazonaws.com/dev";
 
 const Home = () => {
   const [quotes, setQuotes] = useState([]);
-  const [open, setOpen] = useState(false);
+
+  // States for new quote creation
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newQuote, setNewQuote] = useState({
+    quote: "",
+    quoter: "",
+    source: "",
+  });
+
+  // States for editing a quote
   const [editQuoteId, setEditQuoteId] = useState(null);
   const [editQuoteData, setEditQuoteData] = useState({
     quote: "",
     quoter: "",
     source: "",
   });
-  const [newQuote, setNewQuote] = useState({
-    quote: "",
-    quoter: "",
-    source: "",
-  });
+
+  // States for filtering the quotes
+  const [filterSource, setFilterSource] = useState("");
+  const [filterQuoter, setFilterQuoter] = useState("");
+
+  // States for rendering snackbar
   const vertical = "bottom";
   const horizontal = "center";
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [filterSource, setFilterSource] = useState("");
-  const [filterQuoter, setFilterQuoter] = useState("");
 
+  // Method to get all of the quotes entries from the backend
   const handelGetAllQuotes = async () => {
+    // Reseting the filters states
     setFilterSource("");
     setFilterQuoter("");
+
     try {
       const response = await axios.get(`${BASE_URL}/quotes`);
       if (!response.data || !response.data.quotes) {
@@ -66,6 +77,7 @@ const Home = () => {
     }
   };
 
+  // Method to get quotes that matches the filter values
   const handelGetFilteredQuotes = async () => {
     try {
       let url = `${BASE_URL}/quotes?`;
@@ -92,7 +104,8 @@ const Home = () => {
     }
   };
 
-  const handleCreate = async () => {
+  // Method to send a quote creation request to the backend
+  const handleCreateQuotes = async () => {
     try {
       const response = await axios.post(`${BASE_URL}/quotes`, newQuote);
       if (!response.data || !response.data.quote) {
@@ -119,19 +132,15 @@ const Home = () => {
       }
       setSnackbarOpen(true);
     } finally {
-      setNewQuote({ quote: "", quoter: "", source: "" });
+      setNewQuote({ quote: "", quoter: "", source: "" }); // Reset the state values to empty string
       handleClose();
     }
   };
 
-  useEffect(() => {
-    handelGetAllQuotes();
-  }, []);
-
+  // Method to handle the click event on 'Edit' button of a quote card
   const handleEdit = (quote) => {
     console.log("handleEdit is called for", quote.id);
     setEditQuoteId(quote.id);
-    console.log("Quote Id to be edited:", editQuoteId);
     setEditQuoteData({
       quote: quote.quote,
       quoter: quote.quoter,
@@ -140,6 +149,7 @@ const Home = () => {
     });
   };
 
+  // Method handle the click event on 'Like' button on the quote card
   const handleLike = async (id, quote) => {
     try {
       quote.likes += 1;
@@ -155,11 +165,12 @@ const Home = () => {
     } catch (error) {
       console.error("Error updating quote:", error);
     } finally {
-      setEditQuoteId(null);
+      setEditQuoteId(null); // Reset edit quote id to 'null'
       setEditQuoteData({ quote: "", quoter: "", source: "", likes: 0 });
     }
   };
 
+  // Method to handle the click event on 'Save' button on the quote card, and send an update request to the backend
   const handleUpdate = async (id, updatedQuote) => {
     try {
       const response = await axios.put(
@@ -183,12 +194,12 @@ const Home = () => {
       setSnackbarMessage("An unknown error occurred. Please try again.");
       setSnackbarOpen(true);
     } finally {
-      setEditQuoteId(null);
+      setEditQuoteId(null); // Reset edit quote id to 'null'
       setEditQuoteData({ quote: "", quoter: "", source: "" });
     }
   };
 
-  // Method to handle delete functionality
+  // Method to send a 'delete' request to the backend for the entry with the given 'id'
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/quotes/${id}`);
@@ -205,11 +216,19 @@ const Home = () => {
     }
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // Fetch all quotes from the backend when page is loaded/reloaded
+  useEffect(() => {
+    handelGetAllQuotes();
+  }, []);
 
+  // Modal open/close handlers
+  const handleOpen = () => setIsModalOpen(true);
+  const handleClose = () => setIsModalOpen(false);
+
+  // Snackbar close handler
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
+  // Handler to track new quote form values
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewQuote((prevQuote) => ({
@@ -218,6 +237,7 @@ const Home = () => {
     }));
   };
 
+  // Handler to track updated quote form values
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
     setEditQuoteData((prevData) => ({
@@ -228,7 +248,7 @@ const Home = () => {
 
   return (
     <div>
-      <Container style={{ marginTop: "32px" }}>
+      <Container style={{ marginTop: 15 }}>
         <Typography variant="h3" sx={{ textAlign: "center" }} gutterBottom>
           Kwot
         </Typography>
@@ -255,6 +275,7 @@ const Home = () => {
               value={filterSource}
               onChange={(e) => setFilterSource(e.target.value)}
               placeholder="Movie"
+              // Clear button inside the input field
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -279,6 +300,7 @@ const Home = () => {
               value={filterQuoter}
               onChange={(e) => setFilterQuoter(e.target.value)}
               placeholder="Sherlock Homes"
+              // Clear button inside the input field
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -296,6 +318,7 @@ const Home = () => {
                 ),
               }}
             />
+            {/* Filter button */}
             <IconButton>
               <FilterAltIcon onClick={handelGetFilteredQuotes}></FilterAltIcon>
             </IconButton>
@@ -305,9 +328,11 @@ const Home = () => {
               display: "flex",
             }}
           >
+            {/* Refresh button */}
             <IconButton sx={{ marginRight: 0 }} onClick={handelGetAllQuotes}>
               <RefreshIcon></RefreshIcon>
             </IconButton>
+            {/* Add new quote button */}
             <IconButton>
               <AddBoxIcon
                 variant="contained"
@@ -377,6 +402,7 @@ const Home = () => {
                         alignItems: "center",
                       }}
                     >
+                      {/* Like button and counter */}
                       <IconButton
                         onClick={() => handleLike(quote.id, quote)}
                         sx={{ marginRight: 1 }}
@@ -394,6 +420,7 @@ const Home = () => {
                         gap: 1,
                       }}
                     >
+                      {/* Edit button */}
                       <Button
                         variant="outlined"
                         color="primary"
@@ -402,6 +429,7 @@ const Home = () => {
                       >
                         Edit
                       </Button>
+                      {/* Delete button */}
                       <Button
                         variant="contained"
                         color="error"
@@ -422,6 +450,7 @@ const Home = () => {
                       autoComplete="off"
                       sx={{ bgcolor: "#fff", padding: 2, borderRadius: "10px" }}
                     >
+                      {/* Edit quote form */}
                       <TextField
                         label="Quote"
                         variant="outlined"
@@ -464,7 +493,7 @@ const Home = () => {
           ))}
         </Grid>
         <Modal
-          open={open}
+          open={isModalOpen}
           onClose={handleClose}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
@@ -492,6 +521,7 @@ const Home = () => {
               New quote
             </Typography>
             <Box component="form" noValidate autoComplete="off">
+              {/* New quote form */}
               <TextField
                 label="Quote"
                 variant="outlined"
@@ -526,7 +556,7 @@ const Home = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleCreate}
+                onClick={handleCreateQuotes}
                 disabled={newQuote.quote === "" || newQuote.quoter === ""}
               >
                 Submit
