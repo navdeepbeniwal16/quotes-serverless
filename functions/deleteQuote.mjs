@@ -35,6 +35,10 @@ const deleteQuote = async (quoteId) => {
   console.log("Deleted Quote (with Id):", quoteId);
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: "Quote deleted successfully",
       id: quoteId,
@@ -50,6 +54,10 @@ export const handler = async (event) => {
     console.error("{id} path parameter is missing in the url");
     return {
       statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "{id} path parameter is missing in the url",
       }),
@@ -70,6 +78,10 @@ export const handler = async (event) => {
       console.error("Quote with the passed {id} doesn't exist");
       return {
         statusCode: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         body: JSON.stringify({
           message: "Quote with the passed {id} doesn't exist",
         }),
@@ -79,6 +91,10 @@ export const handler = async (event) => {
     console.error(`Error deleting quote`, error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({
         message: "Internal server error",
         error: error.message,
