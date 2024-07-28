@@ -39,3 +39,73 @@ For a quick and efficient local setup, you can pull and run the Docker image. Ma
    docker run -d -p 80:80 navdeep16/kwot:latest
    ```
 3. Access the application: Open your browser and navigate to http://localhost
+
+## Endpoints
+
+### Create a Quote
+
+- **Endpoint**: `POST /quotes`
+- **Description**: Creates a new quote.
+- **Request Body**:
+  ```json
+  {
+    "quoter": "string",
+    "quote": "string",
+    "source": "string",
+  }
+  ```
+**Responses:**
+- `200 OK:` Quote is created successfully.
+- `409 Conflict:` Quote creation fails due to a conflict.
+- `404 Not Found:` The requested resource is not found.
+- `500 Internal Server Error:` Unknown server error.
+
+### Read Quotes
+
+- **Endpoint**: `GET /quotes`
+- **Description**: Retrieves all quotes, with optional filters `source` and `quoter`.
+- **Query Parameters**:
+  - `source` (optional): Filter quotes by source (Movie/TV show).
+  - `quoter` (optional): Filter quotes by quoter.
+- **Responses**:
+  - `200 OK`: Quotes are retrieved successfully.
+  - `500 Internal Server Error`: Unknown server error.
+
+### Read a Single Quote
+
+- **Endpoint**: `GET /quotes/{id}`
+- **Description**: Retrieves a quote by its unique ID.
+- **Path Parameters**:
+  - `id` (required): The unique identifier of the quote.
+- **Responses**:
+  - `200 OK`: Quote is retrieved successfully.
+  - `404 Not Found`: Quote not found.
+  - `500 Internal Server Error`: Unknown server error.
+
+### Update a Quote
+
+- **Endpoint**: `PUT /quotes/{id}`
+- **Description**: Updates an existing quote by its unique ID.
+- **Path Parameters**:
+  - `id` (required): The unique identifier of the quote.
+- **Request Body**:
+  ```json
+  {
+    "quoter": "string",
+    "quote": "string",
+    "source": "string",
+    "likes": "number"
+  }
+
+### Delete a Quote
+
+- **Endpoint**: `DELETE /quotes/{id}`
+- **Description**: Deletes an existing quote by its unique ID.
+- **Path Parameters**:
+  - `id` (required): The unique identifier of the quote.
+- **Responses**:
+  - `200 OK`: Quote is deleted successfully.
+  - `404 Not Found`: Quote not found.
+  - `500 Internal Server Error`: Unknown server error.
+
+
