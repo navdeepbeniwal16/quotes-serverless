@@ -42,6 +42,8 @@ For a quick and efficient local setup, you can pull and run the Docker image. Ma
 
 ## Endpoints
 
+**`BASE_URL` :** https://gz2qfy74t0.execute-api.us-east-1.amazonaws.com/dev
+
 ### Create a Quote
 
 - **Endpoint**: `POST /quotes`
