@@ -12,11 +12,15 @@ const TABLE = "Quotes";
 
 // Method to validate quote request body
 const validateBody = (requestBody) => {
-  const requiredFields = ["quoter", "quote", "source", "likes"];
+  const requiredFields = ["quoter", "quote", "likes"];
   for (const field of requiredFields) {
-    if (!requestBody[field] || requestBody[field] === "") {
+    if (
+      requestBody[field] === undefined ||
+      requestBody[field] === null ||
+      requestBody[field] === ""
+    ) {
       throw new Error(
-        "Request body is missing required fields: 'quoter', 'quote', 'source', 'likes'"
+        "Request body is missing required fields: 'quoter', 'quote', likes'"
       );
     }
 
